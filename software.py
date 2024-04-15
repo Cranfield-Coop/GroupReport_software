@@ -10,10 +10,10 @@ from io import StringIO
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-logo_path = "C:/Users/Louis/Desktop/Codes/cranfield_logo.png" ##remember to change the path to the logo
-logo_path = "C:/Users/moi/OneDrive - etu.utc.fr/Bureau/UTC/Cranfield/Group_project/Software/cranfield_logo.png" ##remember to change the path to the logo
-
-st.image(logo_path, width= 100)
+#logo_path = "C:/Users/Louis/Desktop/Codes/cranfield_logo.png" ##remember to change the path to the logo
+#logo_path = "C:/Users/moi/OneDrive - etu.utc.fr/Bureau/UTC/Cranfield/Group_project/Software/cranfield_logo.png" ##remember to change the path to the logo
+#
+#st.image(logo_path, width= 100)
 
 st.write("# Turbulence Modelling Predictor")
 st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>', unsafe_allow_html=True)
