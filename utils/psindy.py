@@ -12,6 +12,14 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 
 def plot(df, Reynolds_Numbers):
+    """Plot the data for each Reynolds number
+    Args:
+        df (pd.DataFrame): The dataframe containing the data
+        Reynolds_Numbers (list): The list of Reynolds numbers
+
+    Returns:
+        None
+    """
     columns = ["U", "u'u'", "v'v'", "w'w'", "u'v'"]
     for col in columns:
         plt.figure(figsize=(12, 6))
@@ -34,6 +42,15 @@ def plot(df, Reynolds_Numbers):
 
 
 def data_interpolation(df, nb, Reynolds_Numbers):
+    """
+    Interpolate the data to have the same number of points for each Reynolds number
+    Args:
+        df (pd.DataFrame): The dataframe containing the data
+        nb (int): The number of points to interpolate
+        Reynolds_Numbers (list): The list of Reynolds numbers
+
+    Returns:
+        pd.DataFrame: The interpolated dataframe    """
     interval = np.linspace(df['y^+'].min(), df['y^+'].max(), num=nb)
     interpolated_columns = {}
     for column in df.columns:
@@ -47,6 +64,7 @@ def data_interpolation(df, nb, Reynolds_Numbers):
 
 
 def first_derivative(columns, df):
+    """Compute the first derivative of the columns"""
     for col in columns:
         x = df[col].to_numpy()
         y = df["y^+"].to_numpy()
@@ -56,6 +74,7 @@ def first_derivative(columns, df):
 
 
 def second_derivative(columns, df):
+    """Compute the second derivative of the columns"""
     for col in columns:
         x = df[col].to_numpy()
         y = df["y^+"].to_numpy()
@@ -65,6 +84,15 @@ def second_derivative(columns, df):
 
 
 def data_processing(df, interpolation, nb_interpolation, Reynolds_Numbers):
+    """Process the data to have the first and second derivative
+    Args:
+        df (pd.DataFrame): The dataframe containing the data
+        interpolation (int): The interpolation method
+        nb_interpolation (int): The number of points to interpolate
+        Reynolds_Numbers (list): The list of Reynolds numbers
+    Returns:
+        dict: The processed data
+        """
     if interpolation == 0:
         data = {f'df_{Re}': df[df["Re_tau"] == Re] for Re in Reynolds_Numbers}
         for Re in Reynolds_Numbers:
@@ -94,6 +122,14 @@ def data_processing(df, interpolation, nb_interpolation, Reynolds_Numbers):
 
 
 def data_PySINDy(data, Reynolds_Numbers):
+    """Prepare the data for PySINDy
+    Args:
+        data (dict): The processed data
+        Reynolds_Numbers (list): The list of Reynolds numbers
+    Returns:
+        list: The input data
+        list: The output data
+        """
     for Re in Reynolds_Numbers:
         data[f"df_{Re}"] = data[f"df_{Re}"].drop(columns=["Re_tau"])
     X = [[] for _ in range(len(Reynolds_Numbers))]
@@ -107,6 +143,13 @@ def data_PySINDy(data, Reynolds_Numbers):
 
 
 def integrate(y_plus, y, coeffs):
+    """Integrate the ODEs
+    Args:
+        y_plus (float): The y_plus value
+        y (list): The list of variables
+        coeffs (list): The coefficients
+    Returns:
+        list: The derivatives"""
     U, uu, vv, ww, uv, P, dUdy, duudy, dvvdy, dwwdy, duvdy, dPdy = y
     dU_dy = dUdy
     duu_dy = duudy
@@ -123,47 +166,19 @@ def integrate(y_plus, y, coeffs):
     return derivatives
 
 
-def simulation(X, df, model):
-    initial_conditions = X[0]
-    coeffs = model.optimizer.coef_
-    y_plus_points = df["y^+"].values
-    solution = solve_ivp(
-        fun=integrate,
-        t_span=(y_plus_points.min(), y_plus_points.max()),
-        y0=initial_conditions,
-        args=(coeffs,),
-        t_eval=y_plus_points,
-        method='RK45',
-        dense_output=True
-    )
-    return solution
-
-
-def simulation_plot(df, solution):
-    col = ["U", "u'u'", "v'v'", "w'w'", "u'v'"]
-    for i in range(5):
-        plt.figure(figsize=(12, 6))
-        subset = df[col[i]]
-        if col[i] == "u'v'":
-            solution.y[i] = - solution.y[i]
-            subset = -1 * df[col[i]]
-        plt.plot(
-            solution.t, solution.y[i], label=f"{col[i]} (PySINDy)")
-        plt.plot(solution.t, subset.values,
-                 label=f"{col[i]} (DNS)")
-        plt.xscale('log')
-        plt.xlabel('y^+')
-        if col[i] == "u'v'":
-            plt.ylabel(f"- {col[i]}")
-            plt.title(f"- {col[i]} as a function of y^+")
-        else:
-            plt.ylabel(col[i])
-            plt.title(f"{col[i]} as a function of y^+")
-        plt.legend()
-        st.pyplot(plt)
-
-
 def test_overfitting(X_train, y_train, X_test, y_test, model, Reynolds_Numbers, nb_model):
+    """Test if the model is overfitting
+    Args:
+        X_train (list): The input training data
+        y_train (list): The output training data
+        X_test (list): The input testing data
+        y_test (list): The output testing data
+        model (dict): The models
+        Reynolds_Numbers (list): The list of Reynolds numbers
+        nb_model (int): The number of the model
+
+    Returns:
+        None"""
     y_train_pred = model[Reynolds_Numbers[nb_model]].predict(X_train)
     mse_train = mean_squared_error(y_train, y_train_pred)
     y_test_pred = model[Reynolds_Numbers[nb_model]].predict(X_test)
@@ -176,22 +191,13 @@ def test_overfitting(X_train, y_train, X_test, y_test, model, Reynolds_Numbers, 
         st.metric(label="PySINDy Model", value="No Overfitting !")
 
 
-def integrate(y_plus, y, coeffs):
-    U, uu, vv, ww, uv, P, dUdy, duudy, dvvdy, dwwdy, duvdy, dPdy = y
-    dU_dy = dUdy
-    duu_dy = duudy
-    dvv_dy = dvvdy
-    dww_dy = dwwdy
-    duv_dy = duvdy
-    dP_dy = dPdy
-    derivatives = [dU_dy, duu_dy, dvv_dy, dww_dy, duv_dy, dP_dy]
-    for i in range(6, 12):
-        dd = coeffs[i][0] + np.dot(coeffs[i][1:], y)
-        derivatives.append(dd)
-    return derivatives
-
-
 def simulation(X, df, model):
+    """Simulate the model
+    Args:
+        X (list): The input data
+        df (pd.DataFrame): The dataframe containing the data
+        model (dict): The models
+    """
     initial_conditions = X[0]
     coeffs = model.optimizer.coef_
     y_plus_points = df["y^+"].values
@@ -208,6 +214,13 @@ def simulation(X, df, model):
 
 
 def simulation_plot(df, solution):
+    """Plot the simulation
+    Args:
+        df (pd.DataFrame): The dataframe containing the data
+        solution (scipy.integrate._ivp.ivp.OdeSolution): The solution
+
+    Returns:
+        None"""
     col = ["U", "u'u'", "v'v'", "w'w'", "u'v'"]
     for i in range(5):
         plt.figure(figsize=(12, 6))
