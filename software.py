@@ -1,6 +1,5 @@
 #Add header
 
-#amsvdm
 
 import streamlit as st
 import pandas as pd
