@@ -29,7 +29,7 @@ def plot(df, Reynolds_Numbers):
                 subset[col] = - subset[col]
             plt.plot(subset["y^+"], subset[col], label=f"Re={Re}")
         plt.xscale('log')
-        plt.xlim(left=0.9)
+        plt.xlim(left=0.1, right = 10000)
         plt.xlabel('y^+')
         if col == "u'v'":
             plt.ylabel(f"- {col}")
@@ -221,16 +221,18 @@ def simulation_plot(df, solution):
 
     Returns:
         None"""
-    col = ["U", "u'u'", "v'v'", "w'w'", "u'v'"]
+    col = ["U","u'u'","v'v'","w'w'","u'v'"]
     for i in range(5):
         plt.figure(figsize=(12, 6))
-        subset = df[col[i]]
+        df1 = df[df['y^+'].isin(solution.t)]
+        subset = df1[col[i]]
         if col[i] == "u'v'":
-            solution.y[i] = - solution.y[i]
-            subset = -1 * df[col[i]]
-        plt.plot(solution.t, solution.y[i], label=f"{col[i]} (PySINDy)")
+            solution.y[i] = - solution.y[i] 
+            subset = -1 * df1[col[i]]
+        plt.plot(solution.t, solution.y[i],label = f"{col[i]} (PySINDy)")
         plt.plot(solution.t, subset.values, label=f"{col[i]} (DNS)")
         plt.xscale('log')
+        plt.xlim(left=0.1, right = 10000)
         plt.xlabel('y^+')
         if col[i] == "u'v'":
             plt.ylabel(f"- {col[i]}")
