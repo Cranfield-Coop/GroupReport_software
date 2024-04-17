@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils.PINNs.TurbulenceModel.NNModel import NNModel
+from utils.pinns.TurbulenceModel.NNModel import NNModel
 
 
 # Define the PyTorch Lightning module for training the PINN
@@ -80,7 +80,8 @@ class TurbulenceModelPINN(L.LightningModule):
             activation=self.activation,
         )
 
-        self.save_hyperparameters()  # Automatically logs and saves hyperparameters for reproducibility
+        # Automatically logs and saves hyperparameters for reproducibility
+        self.save_hyperparameters()
 
     def forward(self, x):
         return self.model(x)
@@ -151,8 +152,10 @@ class TurbulenceModelPINN(L.LightningModule):
         # Compute the loss between the predicted and true momentum equations
         x_momentum_eq = -nu * grad2_U + grad_uv
         y_momentum_eq = (1 / self.rho) * grad_P + grad_vv
-        loss_x_momentum = F.mse_loss(x_momentum_eq, torch.zeros_like(x_momentum_eq))
-        loss_y_momentum = F.mse_loss(y_momentum_eq, torch.zeros_like(y_momentum_eq))
+        loss_x_momentum = F.mse_loss(
+            x_momentum_eq, torch.zeros_like(x_momentum_eq))
+        loss_y_momentum = F.mse_loss(
+            y_momentum_eq, torch.zeros_like(y_momentum_eq))
         momentum_loss = loss_x_momentum + loss_y_momentum
         self.log(
             "train_phys_momentum_loss", momentum_loss, on_step=False, on_epoch=True
@@ -205,16 +208,20 @@ class TurbulenceModelPINN(L.LightningModule):
 
         # Compute the MSE loss between the predictions and the target data
         loss_bound_U = F.mse_loss(U_pred, U_data)
-        self.log("train_bound_U_loss", loss_bound_U, on_step=False, on_epoch=True)
+        self.log("train_bound_U_loss", loss_bound_U,
+                 on_step=False, on_epoch=True)
 
         loss_bound_dUdy = F.mse_loss(dUdy_pred, dUdy_data)
-        self.log("train_bound_dUdy_loss", loss_bound_dUdy, on_step=False, on_epoch=True)
+        self.log("train_bound_dUdy_loss", loss_bound_dUdy,
+                 on_step=False, on_epoch=True)
 
         loss_bound_P = F.mse_loss(P_pred, P_data)
-        self.log("train_bound_P_loss", loss_bound_P, on_step=False, on_epoch=True)
+        self.log("train_bound_P_loss", loss_bound_P,
+                 on_step=False, on_epoch=True)
 
         loss_bound_k = F.mse_loss(k_pred, k_data)
-        self.log("train_bound_k_loss", loss_bound_k, on_step=False, on_epoch=True)
+        self.log("train_bound_k_loss", loss_bound_k,
+                 on_step=False, on_epoch=True)
 
         loss_bound_stress = F.mse_loss(
             torch.cat([uu_pred, vv_pred, ww_pred, uv_pred], dim=1),
@@ -329,15 +336,23 @@ class TurbulenceModelPINN(L.LightningModule):
         self.log("mse_ww", loss_bound_ww, on_step=False, on_epoch=True)
         self.log("mse_uv", loss_bound_uv, on_step=False, on_epoch=True)
 
-        # Compute the R^2 score 
-        r2_U = 1 - (U_pred - U_data).pow(2).sum() / (U_data - U_data.mean()).pow(2).sum()
-        r2_dUdy = 1 - (dUdy_pred - dUdy_data).pow(2).sum() / (dUdy_data - dUdy_data.mean()).pow(2).sum()
-        r2_P = 1 - (P_pred - P_data).pow(2).sum() / (P_data - P_data.mean()).pow(2).sum()
-        r2_k = 1 - (k_pred - k_data).pow(2).sum() / (k_data - k_data.mean()).pow(2).sum()
-        r2_uu = 1 - (uu_pred - uu_data).pow(2).sum() / (uu_data - uu_data.mean()).pow(2).sum()
-        r2_vv = 1 - (vv_pred - vv_data).pow(2).sum() / (vv_data - vv_data.mean()).pow(2).sum()
-        r2_ww = 1 - (ww_pred - ww_data).pow(2).sum() / (ww_data - ww_data.mean()).pow(2).sum()
-        r2_uv = 1 - (uv_pred - uv_data).pow(2).sum() / (uv_data - uv_data.mean()).pow(2).sum()
+        # Compute the R^2 score
+        r2_U = 1 - (U_pred - U_data).pow(2).sum() / \
+            (U_data - U_data.mean()).pow(2).sum()
+        r2_dUdy = 1 - (dUdy_pred - dUdy_data).pow(2).sum() / \
+            (dUdy_data - dUdy_data.mean()).pow(2).sum()
+        r2_P = 1 - (P_pred - P_data).pow(2).sum() / \
+            (P_data - P_data.mean()).pow(2).sum()
+        r2_k = 1 - (k_pred - k_data).pow(2).sum() / \
+            (k_data - k_data.mean()).pow(2).sum()
+        r2_uu = 1 - (uu_pred - uu_data).pow(2).sum() / \
+            (uu_data - uu_data.mean()).pow(2).sum()
+        r2_vv = 1 - (vv_pred - vv_data).pow(2).sum() / \
+            (vv_data - vv_data.mean()).pow(2).sum()
+        r2_ww = 1 - (ww_pred - ww_data).pow(2).sum() / \
+            (ww_data - ww_data.mean()).pow(2).sum()
+        r2_uv = 1 - (uv_pred - uv_data).pow(2).sum() / \
+            (uv_data - uv_data.mean()).pow(2).sum()
         self.log("r2_U", r2_U, on_step=False, on_epoch=True)
         self.log("r2_dUdy", r2_dUdy, on_step=False, on_epoch=True)
         self.log("r2_P", r2_P, on_step=False, on_epoch=True)
@@ -368,11 +383,11 @@ class TurbulenceModelPINN(L.LightningModule):
         # Total loss
         mse_total = F.mse_loss(predictions, targets)
         rmse_total = torch.sqrt(mse_total)
-        r2_total = 1 - (predictions - targets).pow(2).sum() / (targets - targets.mean()).pow(2).sum()
+        r2_total = 1 - (predictions - targets).pow(2).sum() / \
+            (targets - targets.mean()).pow(2).sum()
         self.log("mse_total", mse_total, on_step=False, on_epoch=True)
         self.log("rmse_total", rmse_total, on_step=False, on_epoch=True)
         self.log("r2_total", r2_total, on_step=False, on_epoch=True)
-
 
         return {
             "mse_total": mse_total,

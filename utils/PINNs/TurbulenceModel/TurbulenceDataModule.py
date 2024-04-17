@@ -1,7 +1,7 @@
 import lightning as L
 from torch.utils.data import DataLoader
 
-from utils.PINNs.TurbulenceModel.TurbulenceDataset import TurbulenceDataset
+from utils.pinns.TurbulenceModel.TurbulenceDataset import TurbulenceDataset
 
 
 class TurbulenceDataModule(L.LightningDataModule):
@@ -43,9 +43,11 @@ class TurbulenceDataModule(L.LightningDataModule):
             self.train_dataset = TurbulenceDataset(
                 self.train_dataset_path, phase="train"
             )
-            self.val_dataset = TurbulenceDataset(self.val_dataset_path, phase="val")
+            self.val_dataset = TurbulenceDataset(
+                self.val_dataset_path, phase="val")
         elif stage == "test":
-            self.test_dataset = TurbulenceDataset(self.test_dataset_path, phase="test")
+            self.test_dataset = TurbulenceDataset(
+                self.test_dataset_path, phase="test")
         elif stage == "predict":
             self.predict_dataset = TurbulenceDataset(
                 predict_dataset_path, phase="predict"
@@ -94,7 +96,7 @@ class TurbulenceDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers
-            #persistent_workers=True,
+            # persistent_workers=True,
         )
 
     def predict_dataloader(self):
@@ -109,5 +111,5 @@ class TurbulenceDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers
-            #persistent_workers=True,
+            # persistent_workers=True,
         )

@@ -3,13 +3,14 @@ import pandas as pd
 import streamlit as st
 import pandas as pd
 import tempfile
-from utils.PINNs.pinns import *
+from utils.pinns.pinns import *
 
 
 def app():
-    #st.image(logo_path, width=100)
+    # st.image(logo_path, width=100)
     st.write("# Turbulence Modelling Predictor")
-    st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',unsafe_allow_html=True) 
+    st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',
+                unsafe_allow_html=True)
     mode_option = st.radio("Select mode:", ("Inference Mode", "Test Mode"))
 
     if mode_option == "Inference Mode":
@@ -24,9 +25,11 @@ def app():
             # Allow user to generate CSV
             step1 = False
             selected_model = st.selectbox(
-                "Select a Model (Re_tau):", ["5200", "2000", "1000", "550", "180"]
+                "Select a Model (Re_tau):", [
+                    "5200", "2000", "1000", "550", "180"]
             )
-            y_min = st.number_input("Enter y_minimum (>0):", value=0.1, format="%.6f")
+            y_min = st.number_input(
+                "Enter y_minimum (>0):", value=0.1, format="%.6f")
             y_max = st.number_input(
                 "Enter y_maximum (y_min to selected Re_tau):",
                 min_value=y_min,
@@ -34,7 +37,8 @@ def app():
                 value=float(selected_model),
                 format="%.6f",
             )
-            y_delta = st.number_input("Enter y_delta (>0):", value=0.1, format="%.6f")
+            y_delta = st.number_input(
+                "Enter y_delta (>0):", value=0.1, format="%.6f")
 
             if st.button("Run Inference"):
                 csv_path = prepare_prediction_csv(
@@ -95,5 +99,3 @@ def app():
                 display_test_plots(pred_test_df)
         else:
             st.error("Please upload a csv file to proceed.")
-
-
