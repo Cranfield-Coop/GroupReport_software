@@ -14,13 +14,14 @@ class TurbulenceDataset(Dataset):
         phase (string): The phase of the dataset (train, val, or test).
     """
 
-    def __init__(self, csv_file, noise_level, phase="train"):
+    def __init__(self, csv_file, noise=0, phase="train"):
         # Load the dataset and add noise
         df = pd.read_csv(csv_file)
-        df_noise = df.drop(columns='Re_tau').applymap(
-            lambda x: x + np.random.normal(0, noise_level/100))
-        df_noise['Re_tau'] = df['Re_tau']
-        df = df_noise.copy()
+        if noise > 0:
+            df_noise = df.drop(columns='Re_tau').applymap(
+                lambda x: x + np.random.normal(0, noise/100))
+            df_noise['Re_tau'] = df['Re_tau']
+            df = df_noise.copy()
 
         # Model phase
         self.phase = phase

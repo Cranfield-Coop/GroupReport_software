@@ -10,7 +10,7 @@ from utils.pinns.TurbulenceModel.TurbulenceModelPINN import TurbulenceModelPINN
 
 
 def run_test_inference(
-    noise, model_checkpoint_path, test_dataset_path, prediction_output_path
+    model_checkpoint_path, test_dataset_path, prediction_output_path
 ):
     """
     Runs inference on the test dataset using the specified model checkpoint and saves predictions.
@@ -33,7 +33,7 @@ def run_test_inference(
     )
 
     # Prepare the data module specifically for testing
-    data_module.setup(noise, stage="test")
+    data_module.setup(noise=0, stage="test")
 
     # Initialize a PyTorch Lightning trainer
     trainer = L.Trainer(

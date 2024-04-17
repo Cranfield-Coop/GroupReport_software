@@ -32,7 +32,7 @@ class TurbulenceDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
-    def setup(self, noise, stage=None, predict_dataset_path=None):
+    def setup(self, noise=0, stage=None, predict_dataset_path=None):
         """
         Setup the data for the given stage
 

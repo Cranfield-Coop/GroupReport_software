@@ -77,8 +77,7 @@ def app():
             )
 
     elif mode_option == "Test Mode":
-        noise_level = st.slider(
-            'Before uploading, select the noise level (%)', 0, 50, 0)
+        noise_level = 0
         uploaded_file_test = st.file_uploader(
             "Upload CSV file with features + target values:", type=["csv"]
         )
@@ -91,7 +90,7 @@ def app():
 
                 # Step 2: Run Test Inference
                 metrics = run_test_inference(
-                    noise_level,
+
                     model_checkpoint_path="epoch=20332-step=731988.ckpt",
                     test_dataset_path=temp_csv_test_path,
                     prediction_output_path="output_test.csv",
