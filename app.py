@@ -33,9 +33,12 @@ def main():
         st.success("File successfully uploaded!")
         df = pd.read_csv(uploaded_file)
         # Add noise to the dataframe
-
-        noise = np.random.normal(0, noise_level/100, df.shape)
-        df = df + noise
+        print(
+            f"Adding noise to the dataframe with noise level: {noise_level}%")
+        df_noise = df.drop(columns='Re_tau').applymap(
+            lambda x: x + np.random.normal(0, noise_level/100))
+        df_noise['Re_tau'] = df['Re_tau']
+        df = df_noise.copy()
 
         st.write("**Please choose a model:**")
         model_choice = st.radio("Please choose a model:", ('PySINDy', 'PINNs'))
