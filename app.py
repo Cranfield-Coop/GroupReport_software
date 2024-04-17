@@ -10,9 +10,9 @@ from io import StringIO
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from utils.psindy import *
 # import tempfile
 # from run_inference import *
-from utils.psindy import *
 # from pinns import *
 
 
@@ -25,11 +25,18 @@ def main():
     st.write("# Turbulence Modelling Predictor")
     st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',
                 unsafe_allow_html=True)
+    noise_level = st.slider(
+        'Before uploading, select the noise level (%)', 0, 50, 0)
     uploaded_file = st.file_uploader(
         "\n\n**Please upload the CSV below.**", type=['csv'], key="file-uploader")
     if uploaded_file is not None:
         st.success("File successfully uploaded!")
         df = pd.read_csv(uploaded_file)
+        # Add noise to the dataframe
+
+        noise = np.random.normal(0, noise_level/100, df.shape)
+        df = df + noise
+
         st.write("**Please choose a model:**")
         model_choice = st.radio("Please choose a model:", ('PySINDy', 'PINNs'))
         if model_choice == 'PySINDy':
