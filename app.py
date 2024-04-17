@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import utils.PySINDy.pysindy_streamlit as pysindy_streamlit
-import utils.pinns.pinns_streamlit as pinns_streamlit
+import utils.PINNs.pinns_streamlit as pinns_streamlit
 
 st.set_page_config(
     page_title="Turbulence Modelling Predictor",

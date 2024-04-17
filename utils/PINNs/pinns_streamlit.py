@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import pandas as pd
 import tempfile
-from utils.pinns.pinns import *
+from utils.PINNs.pinns import *
 
 
 def app():

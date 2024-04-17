@@ -4,8 +4,8 @@ import csv
 import numpy as np
 
 # Importing modules for data handling and the neural network model
-from utils.pinns.TurbulenceModel.TurbulenceDataModule import TurbulenceDataModule
-from utils.pinns.TurbulenceModel.TurbulenceModelPINN import TurbulenceModelPINN
+from utils.PINNs.TurbulenceModel.TurbulenceDataModule import TurbulenceDataModule
+from utils.PINNs.TurbulenceModel.TurbulenceModelPINN import TurbulenceModelPINN
 
 
 def run_inference(

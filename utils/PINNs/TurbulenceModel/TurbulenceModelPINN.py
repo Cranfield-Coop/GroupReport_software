@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils.pinns.TurbulenceModel.NNModel import NNModel
+from utils.PINNs.TurbulenceModel.NNModel import NNModel
 
 
 # Define the PyTorch Lightning module for training the PINN

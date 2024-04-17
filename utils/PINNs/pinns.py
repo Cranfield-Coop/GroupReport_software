@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import tempfile
-from utils.pinns.run_inference import *
-from utils.pinns.run_test_inference import *
-from utils.pinns.prepare_prediction_csv import *
+from utils.PINNs.run_inference import *
+from utils.PINNs.run_test_inference import *
+from utils.PINNs.prepare_prediction_csv import *
 
 
 def display_plots(df):

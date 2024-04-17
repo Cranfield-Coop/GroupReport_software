@@ -1,7 +1,7 @@
 import lightning as L
 from torch.utils.data import DataLoader
 
-from utils.pinns.TurbulenceModel.TurbulenceDataset import TurbulenceDataset
+from utils.PINNs.TurbulenceModel.TurbulenceDataset import TurbulenceDataset
 
 
 class TurbulenceDataModule(L.LightningDataModule):
