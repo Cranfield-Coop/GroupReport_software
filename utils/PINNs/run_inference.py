@@ -9,7 +9,7 @@ from utils.pinns.TurbulenceModel.TurbulenceModelPINN import TurbulenceModelPINN
 
 
 def run_inference(
-    model_checkpoint_path, prediction_dataset_path, prediction_output_path
+    noise, model_checkpoint_path, prediction_dataset_path, prediction_output_path
 ):
     """
     Runs inference on the test dataset using the specified model checkpoint and saves predictions.
@@ -32,7 +32,7 @@ def run_inference(
 
     # Prepare the data module specifically for testing
     data_module.setup(
-        stage="predict", predict_dataset_path=prediction_dataset_path)
+        noise, stage="predict",  predict_dataset_path=prediction_dataset_path)
 
     # Set the model to evaluation mode
     model.eval()

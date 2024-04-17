@@ -32,7 +32,7 @@ class TurbulenceDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
-    def setup(self, stage=None, predict_dataset_path=None):
+    def setup(self, noise, stage=None, predict_dataset_path=None):
         """
         Setup the data for the given stage
 
@@ -41,16 +41,16 @@ class TurbulenceDataModule(L.LightningDataModule):
         """
         if stage == "fit":
             self.train_dataset = TurbulenceDataset(
-                self.train_dataset_path, phase="train"
+                self.train_dataset_path, noise, phase="train"
             )
             self.val_dataset = TurbulenceDataset(
-                self.val_dataset_path, phase="val")
+                self.val_dataset_path, noise, phase="val")
         elif stage == "test":
             self.test_dataset = TurbulenceDataset(
-                self.test_dataset_path, phase="test")
+                self.test_dataset_path, noise, phase="test")
         elif stage == "predict":
             self.predict_dataset = TurbulenceDataset(
-                predict_dataset_path, phase="predict"
+                predict_dataset_path, noise, phase="predict"
             )
 
     def train_dataloader(self):
