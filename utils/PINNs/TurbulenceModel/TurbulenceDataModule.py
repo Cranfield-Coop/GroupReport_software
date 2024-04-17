@@ -1,7 +1,7 @@
 import lightning as L
 from torch.utils.data import DataLoader
 
-from TurbulenceModel.TurbulenceDataset import TurbulenceDataset
+from utils.PINNs.TurbulenceModel.TurbulenceDataset import TurbulenceDataset
 
 
 class TurbulenceDataModule(L.LightningDataModule):
@@ -93,8 +93,8 @@ class TurbulenceDataModule(L.LightningDataModule):
             self.test_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers,
-            persistent_workers=True,
+            num_workers=self.num_workers
+            #persistent_workers=True,
         )
 
     def predict_dataloader(self):
@@ -108,6 +108,6 @@ class TurbulenceDataModule(L.LightningDataModule):
             self.predict_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers,
-            persistent_workers=True,
+            num_workers=self.num_workers
+            #persistent_workers=True,
         )

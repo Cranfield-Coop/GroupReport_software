@@ -23,8 +23,8 @@ class TurbulenceDataset(Dataset):
         # Select features and target
         self.features = df[
             [
-                "y^+",
                 "y/delta",
+                "y^+",
                 "u_tau",
                 "nu",
                 "Re_tau"
