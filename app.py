@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,26 +10,29 @@ from io import StringIO
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-import tempfile
-from run_inference import *
+# import tempfile
+# from run_inference import *
 from utils.psindy import *
-from pinns import *
+# from pinns import *
 
 
 logo_path = "img/cranfield_logo.png"
 columns = ["y^+", "U", "Re_tau", "u'u'", "v'v'", "w'w'", "u'v'", "P", "dU/dy"]
 
+
 def main():
     st.image(logo_path, width=100)
     st.write("# Turbulence Modelling Predictor")
-    st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',unsafe_allow_html=True) 
-    uploaded_file = st.file_uploader("\n\n**Please upload the CSV below.**", type=['csv'], key="file-uploader")
+    st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',
+                unsafe_allow_html=True)
+    uploaded_file = st.file_uploader(
+        "\n\n**Please upload the CSV below.**", type=['csv'], key="file-uploader")
     if uploaded_file is not None:
         st.success("File successfully uploaded!")
         df = pd.read_csv(uploaded_file)
         st.write("**Please choose a model:**")
-        model_choice = st.radio("Please choose a model:",('PySINDy', 'PINNs'))
-        if model_choice =='PySINDy':
+        model_choice = st.radio("Please choose a model:", ('PySINDy', 'PINNs'))
+        if model_choice == 'PySINDy':
             run_pysindy(df)
         elif model_choice == 'PINNs':
             run_pinns()
@@ -37,18 +41,22 @@ def main():
     else:
         st.error("Please upload a csv file to proceed.")
 
+
 def run_pysindy(df):
     st.header("PySINDy Model")
     if all(col in df.columns for col in columns):
         df = df[columns]
     else:
-        st.error("Please upload a csv file with the columns y^+, U, Re_tau, u'u', v'v', w'w', u'v', P and dU/dy to proceed.")
+        st.error(
+            "Please upload a csv file with the columns y^+, U, Re_tau, u'u', v'v', w'w', u'v', P and dU/dy to proceed.")
         return None
     Reynolds_Numbers = sorted(df["Re_tau"].unique(), reverse=True)
     st.subheader("Data processing")
-    mode_choice = st.selectbox("Choose processing mode:", ['Data with interpolation', 'Data without interpolation'])
+    mode_choice = st.selectbox("Choose processing mode:", [
+                               'Data with interpolation', 'Data without interpolation'])
     if mode_choice == 'Data with interpolation':
-        nb_interpolation = st.number_input("Please enter the number of data points to be generated with interpolation:", min_value=5000, max_value=10000, step=1000, key='nb_interp')
+        nb_interpolation = st.number_input("Please enter the number of data points to be generated with interpolation:",
+                                           min_value=5000, max_value=10000, step=1000, key='nb_interp')
         data = data_processing(df, 1, nb_interpolation, Reynolds_Numbers)
     elif mode_choice == "Data without interpolation":
         data = data_processing(df, 0, 0, Reynolds_Numbers)
@@ -65,7 +73,7 @@ def run_pysindy(df):
         X, y = data_PySINDy(data, Reynolds_Numbers)
         model = {}
         feature_names = ["U", "u'u'", "v'v'", "w'w'", "u'v'", "P",
-                            "dU/dy", "du'u'/dy", "dv'v'/dy", "dw'w'/dy", "du'v'/dy", "dP/dy"]
+                         "dU/dy", "du'u'/dy", "dv'v'/dy", "dw'w'/dy", "du'v'/dy", "dP/dy"]
         feature_library = ps.PolynomialLibrary(1)
         st.subheader("Selection of PySINDy hyperparameters")
         threshold_value = st.number_input(
@@ -79,6 +87,7 @@ def run_pysindy(df):
             st.session_state.run_model = True
 
         if st.session_state.run_model:
+            timer_start = time.time()
             for i in range(0, len(Reynolds_Numbers)):
                 optimizer = ps.STLSQ(
                     threshold=threshold_value, alpha=alpha_coeff)
@@ -86,7 +95,7 @@ def run_pysindy(df):
                     feature_library=feature_library, optimizer=optimizer, feature_names=feature_names)
                 model[Reynolds_Numbers[i]].fit(X[i], x_dot=y[i])
                 model[Reynolds_Numbers[i]].print()
-            
+
             nb_model = 0
             if len(Reynolds_Numbers) > 1:
                 X_train = X[0]
@@ -94,9 +103,11 @@ def run_pysindy(df):
                 X_test = X[1]
                 y_test = y[1]
             else:
-                ratio = st.number_input("Please enter the ratio to split the data into training and testing datasets:", value=0.8,format="%.2f")
+                ratio = st.number_input(
+                    "Please enter the ratio to split the data into training and testing datasets:", value=0.8, format="%.2f")
                 if ratio < 0 or ratio > 1:
-                    st.error("Please enter a positive value between 0 and 1 for the ratio!")
+                    st.error(
+                        "Please enter a positive value between 0 and 1 for the ratio!")
                 else:
                     X = X[0]
                     y = y[0]
@@ -105,7 +116,7 @@ def run_pysindy(df):
                     X_test = X[ratio_split:]
                     y_train = y[:ratio_split]
                     y_test = y[ratio_split:]
-
+            timer_stop = time.time()
             st.subheader("PySINDy Output")
             old_stdout = sys.stdout
             sys.stdout = buffer = StringIO()
@@ -114,13 +125,17 @@ def run_pysindy(df):
             model_output = buffer.getvalue()
             st.write("PySINDy Model - Equations")
             st.text(model_output)
+            st.metric("Excecution time",
+                      value=f"{timer_stop - timer_start:.2f} seconds")
+            print(f"Execution time: {timer_stop - timer_start:.2f} seconds")
 
             sparsity = 0
-            for i in range (len(model[Reynolds_Numbers[nb_model]].optimizer.coef_)):
+            for i in range(len(model[Reynolds_Numbers[nb_model]].optimizer.coef_)):
                 if np.all(model[Reynolds_Numbers[nb_model]].optimizer.coef_[i] == 0):
                     sparsity = -1
             if sparsity == -1:
-                st.error(f"Sparsity parameter is too big ({threshold_value}) and eliminated all coefficients!") 
+                st.error(
+                    f"Sparsity parameter is too big ({threshold_value}) and eliminated all coefficients!")
             else:
                 y_pred = model[Reynolds_Numbers[nb_model]].predict(X_test)
                 y_true = y_test
@@ -131,16 +146,18 @@ def run_pysindy(df):
 
                 st.metric(label="R-Squared", value=f"{r2:.10f}")
                 st.metric(label="Mean Squared Error",
-                        value=f"{mse:.10f}")
+                          value=f"{mse:.10f}")
 
                 test_overfitting(X_train, y_train,
-                                X_test, y_test, model, Reynolds_Numbers, nb_model)
+                                 X_test, y_test, model, Reynolds_Numbers, nb_model)
 
                 st.subheader("PySINDy Simulation")
-                if len(Reynolds_Numbers)> 1:
-                    solution = simulation(X_test, data[f"df_{Reynolds_Numbers[1]}"], model[Reynolds_Numbers[nb_model]])
+                if len(Reynolds_Numbers) > 1:
+                    solution = simulation(
+                        X_test, data[f"df_{Reynolds_Numbers[1]}"], model[Reynolds_Numbers[nb_model]])
                 else:
-                    solution = simulation(X_test, data[f"df_{Reynolds_Numbers[0]}"], model[Reynolds_Numbers[nb_model]])
+                    solution = simulation(
+                        X_test, data[f"df_{Reynolds_Numbers[0]}"], model[Reynolds_Numbers[nb_model]])
                 if 'simulation' not in st.session_state:
                     st.session_state.simulation = False
 
@@ -152,15 +169,23 @@ def run_pysindy(df):
 
                 if st.session_state.simulation:
                     if len(Reynolds_Numbers) > 1:
-                        simulation_plot(data[f"df_{Reynolds_Numbers[1]}"], solution)
-                        df_sim = pd.DataFrame({"y^+":solution.t,'U': solution.y[0], "u'u'": solution.y[1], "v'v'": solution.y[2], "w'w'": solution.y[3], "u'v'": solution.y[4]})
-                        df_pred = data[f"df_{Reynolds_Numbers[1]}"][data[f"df_{Reynolds_Numbers[1]}"]['y^+'].isin(solution.t)]
-                        mae_sim = mean_absolute_error(df_pred[["U","u'u'","v'v'","w'w'","u'v'"]].values,df_sim[["U","u'u'","v'v'","w'w'","u'v'"]].values)
+                        simulation_plot(
+                            data[f"df_{Reynolds_Numbers[1]}"], solution)
+                        df_sim = pd.DataFrame(
+                            {"y^+": solution.t, 'U': solution.y[0], "u'u'": solution.y[1], "v'v'": solution.y[2], "w'w'": solution.y[3], "u'v'": solution.y[4]})
+                        df_pred = data[f"df_{Reynolds_Numbers[1]}"][data[f"df_{Reynolds_Numbers[1]}"]['y^+'].isin(
+                            solution.t)]
+                        mae_sim = mean_absolute_error(df_pred[["U", "u'u'", "v'v'", "w'w'", "u'v'"]].values, df_sim[[
+                                                      "U", "u'u'", "v'v'", "w'w'", "u'v'"]].values)
                     else:
-                        simulation_plot(data[f"df_{Reynolds_Numbers[0]}"], solution)
-                        df_sim = pd.DataFrame({"y^+":solution.t,'U': solution.y[0], "u'u'": solution.y[1], "v'v'": solution.y[2], "w'w'": solution.y[3], "u'v'": solution.y[4]})
-                        df_pred = data[f"df_{Reynolds_Numbers[1]}"][data[f"df_{Reynolds_Numbers[1]}"]['y^+'].isin(solution.t)]
-                        mae_sim = mean_absolute_error(df_pred[["U","u'u'","v'v'","w'w'","u'v'"]].values,df_sim[["U","u'u'","v'v'","w'w'","u'v'"]].values)
+                        simulation_plot(
+                            data[f"df_{Reynolds_Numbers[0]}"], solution)
+                        df_sim = pd.DataFrame(
+                            {"y^+": solution.t, 'U': solution.y[0], "u'u'": solution.y[1], "v'v'": solution.y[2], "w'w'": solution.y[3], "u'v'": solution.y[4]})
+                        df_pred = data[f"df_{Reynolds_Numbers[1]}"][data[f"df_{Reynolds_Numbers[1]}"]['y^+'].isin(
+                            solution.t)]
+                        mae_sim = mean_absolute_error(df_pred[["U", "u'u'", "v'v'", "w'w'", "u'v'"]].values, df_sim[[
+                                                      "U", "u'u'", "v'v'", "w'w'", "u'v'"]].values)
                     if mae_sim < 1:
                         st.write(
                             "The PySINDy model successfully generates equations with physical meaning, and the model simulation is highly accurate.")
@@ -176,7 +201,7 @@ def run_pysindy(df):
                         data=csv,
                         file_name='prediction_output.csv',
                         mime='text/csv',
-                    )            
+                    )
 
                 st.subheader("PySINDy Prediction")
                 cols = ["dU/dy", "du'u'/dy", "dv'v'/dy", "dw'w'/dy", "du'v'/dy", "dP/dy",
@@ -207,25 +232,33 @@ def run_pysindy(df):
                         plt.ylabel(cols[i])
                         plt.legend()
                         st.pyplot(plt)
+
+
 def run_pinns():
     model_options = ['5200', '2000', '1000', '550', '180']
     selected_model = st.selectbox("Select a Model (Re_tau)", model_options)
-    y_min = st.number_input("Enter y_minimum (>0)", min_value=0.000000, value=0.1, format="%.6f")
-    y_max = st.number_input("Enter y_maximum (0 to selected Re_tau)", min_value=0.000000, max_value=float(selected_model), value=min(0.1, float(selected_model)), format="%.6f")
-    y_delta = st.number_input("Enter y_delta (>0)", min_value=0.00000, value=0.1, format="%.6f")
+    y_min = st.number_input("Enter y_minimum (>0)",
+                            min_value=0.000000, value=0.1, format="%.6f")
+    y_max = st.number_input("Enter y_maximum (0 to selected Re_tau)", min_value=0.000000, max_value=float(
+        selected_model), value=min(0.1, float(selected_model)), format="%.6f")
+    y_delta = st.number_input("Enter y_delta (>0)",
+                              min_value=0.00000, value=0.1, format="%.6f")
     if st.button('Run Model'):
         csv_filename = tempfile.mktemp(suffix='.csv')
-        updated_csv_path = prepare_prediction_csv(int(selected_model), y_min, y_max, y_delta, csv_filename)
+        updated_csv_path = prepare_prediction_csv(
+            int(selected_model), y_min, y_max, y_delta, csv_filename)
         if updated_csv_path:
             output_csv_path = tempfile.mktemp(suffix='.csv')
             model_checkpoint_path = "epoch=10461-step=188316.ckpt"
-            run_inference(model_checkpoint_path, updated_csv_path, output_csv_path)
+            run_inference(model_checkpoint_path,
+                          updated_csv_path, output_csv_path)
             prediction_df = pd.read_csv(output_csv_path)
             st.write(prediction_df)
             simulation_pinns(prediction_df)  # Call simulation to plot results
             st.success("Model completed!")
             with open(output_csv_path, "rb") as f:
-                st.download_button("Download Prediction Results", f, "prediction_output.csv")
+                st.download_button(
+                    "Download Prediction Results", f, "prediction_output.csv")
 
 
 # Function to prepare and update the CSV file based on user inputs
@@ -241,8 +274,9 @@ def prepare_prediction_csv(Re_tau, y_plus_min, y_plus_max, y_plus_delta, filenam
     if Re_tau not in data_dict:
         st.error("Invalid Re_tau value provided!")
         return None
-    
-    y_plus_values = np.arange(y_plus_min, y_plus_max + y_plus_delta, y_plus_delta)
+
+    y_plus_values = np.arange(
+        y_plus_min, y_plus_max + y_plus_delta, y_plus_delta)
     results = [{
         "y/delta": (y_plus * data_dict[Re_tau]["nu"]) / data_dict[Re_tau]["u_tau"],
         "y^+": y_plus,
@@ -254,6 +288,7 @@ def prepare_prediction_csv(Re_tau, y_plus_min, y_plus_max, y_plus_delta, filenam
     df = pd.DataFrame(results)
     df.to_csv(filename, index=False)
     return filename
+
 
 if __name__ == "__main__":
     main()
