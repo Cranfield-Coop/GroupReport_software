@@ -5,12 +5,11 @@ import utils.PINNs.pinns_streamlit as pinns_streamlit
 import utils.Comparisons.comparisons_streamlit as comparisons_streamlit
 
 st.set_page_config(
-    page_title="Turbulence Modelling Predictor",
+        page_title="Turbulence Modelling Predictor",
 )
 
 
 logo_path = "img/cranfield_logo.png"
-
 
 class MultiApp:
 
@@ -27,32 +26,28 @@ class MultiApp:
     def run():
         # app = st.sidebar(
         with st.sidebar:
-            st.sidebar.image(logo_path, use_column_width=True)
+            st.sidebar.image(logo_path, use_column_width=True)      
             app = option_menu(
                 menu_title='Menu',
-                options=['PySINDy', 'PINNs', 'Comparisons'],
-                # icons=['house-fill','person-circle','trophy-fill','chat-fill','info-circle-fill'],
+                options=['PySINDy','PINNs','Comparisons'],
+                #icons=['house-fill','person-circle','trophy-fill','chat-fill','info-circle-fill'],
                 menu_icon='chat-text-fill',
                 default_index=0,
                 styles={
-                    "container": {"padding": "5!important", "background-color": 'white'},
-                    "icon": {"black": "#9ca1a1", "font-size": "23px"},
-                    "nav-link": {"color": "black", "font-size": "20px", "text-align": "left", "margin": "0px", "--hover-color": "#9ca1a1"},
-                    "nav-link-selected": {"background-color": "#c0c4c4"}, }
-
-            )
+                    "container": {"padding": "5!important","background-color":'white'},
+        "icon": {"black": "#9ca1a1", "font-size": "23px"}, 
+        "nav-link": {"color":"black","font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#9ca1a1"},
+        "nav-link-selected": {"background-color": "#c0c4c4"},}
+                
+                )
 
         if app == "PySINDy":
             pysindy_streamlit.app()
         if app == "PINNs":
             pinns_streamlit.app()
-<<<<<<< HEAD
         if app == "Comparisons":
             comparisons_streamlit.app()
              
        
   
-=======
-
->>>>>>> 1b6b8e1df945430e533522a4639a5052f3e8230b
     run()
