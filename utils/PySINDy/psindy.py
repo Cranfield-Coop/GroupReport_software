@@ -35,6 +35,7 @@ def plot(df, Reynolds_Numbers):
             plt.title(f"{col} as a function of y^+")
         plt.legend()
         st.pyplot(plt)
+        plt.close()
 
 
 def data_interpolation(df, nb, Reynolds_Numbers):
@@ -181,10 +182,20 @@ def test_overfitting(X_train, y_train, X_test, y_test, model, Reynolds_Numbers, 
     mse_test = mean_squared_error(y_test, y_test_pred)
     if abs(mse_train - mse_test) > 0.001:
         # st.write("PySINDy Model - Overfitting!")
-        st.metric(label="PySINDy Model", value="Overfitting !")
+        st.metric(label="PySINDy Model", 
+                  value="Overfitting !",
+                  delta=None,
+                  delta_color="normal",
+                  help=None,
+                  label_visibility="visible")
     else:
         # st.write("PySINDy Model - No Overfitting!")
-        st.metric(label="PySINDy Model", value="No Overfitting !")
+        st.metric(label="PySINDy Model", 
+                  value="No Overfitting !",
+                  delta=None,
+                  delta_color="normal",
+                  help=None,
+                  label_visibility="visible")
 
 
 def simulation(X, df, model):
@@ -221,20 +232,22 @@ def simulation_plot(df, solution):
     for i in range(5):
         plt.figure(figsize=(12, 6))
         df1 = df[df['y^+'].isin(solution.t)]
-        subset = df1[col[i]]
+        subset_pred = solution.y[i]
+        subset_target = df1[col[i]]
         if col[i] == "u'v'":
-            solution.y[i] = - solution.y[i] 
-            subset = -1 * df1[col[i]]
-        plt.plot(solution.t, solution.y[i],label = f"{col[i]} (PySINDy)")
-        plt.plot(solution.t, subset.values, label=f"{col[i]} (DNS)")
+            subset_pred = -1*solution.y[i] 
+            subset_target = -1 * df1[col[i]]
+        plt.plot(solution.t, subset_pred,color="blue",linestyle="-",label = f"{col[i]} (PySINDy)")
+        plt.plot(solution.t, subset_target.values, color="red",linestyle="--",label=f"{col[i]} (DNS)")
         plt.xscale('log')
         plt.xlim(left=0.1, right = 10000)
         plt.xlabel('y^+')
         if col[i] == "u'v'":
             plt.ylabel(f"- {col[i]}")
-            plt.title(f"- {col[i]} as a function of y^+")
+            plt.title(f"- {col[i]} Prediction vs. DNS")
         else:
             plt.ylabel(col[i])
-            plt.title(f"{col[i]} as a function of y^+")
+            plt.title(f"{col[i]} Prediction vs. DNS")
         plt.legend()
         st.pyplot(plt)
+        plt.close()
