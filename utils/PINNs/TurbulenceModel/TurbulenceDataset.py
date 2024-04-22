@@ -2,7 +2,6 @@ from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import torch
-import numpy as np
 
 
 class TurbulenceDataset(Dataset):
@@ -14,14 +13,9 @@ class TurbulenceDataset(Dataset):
         phase (string): The phase of the dataset (train, val, or test).
     """
 
-    def __init__(self, csv_file, noise=0, phase="train"):
-        # Load the dataset and add noise
+    def __init__(self, csv_file, phase="train"):
+        # Load the dataset
         df = pd.read_csv(csv_file)
-        if noise > 0:
-            df_noise = df.drop(columns='Re_tau').applymap(
-                lambda x: x + np.random.normal(0, noise/100))
-            df_noise['Re_tau'] = df['Re_tau']
-            df = df_noise.copy()
 
         # Model phase
         self.phase = phase
