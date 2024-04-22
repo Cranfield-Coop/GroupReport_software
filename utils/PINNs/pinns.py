@@ -18,8 +18,12 @@ def display_plots(df):
         plt.plot(df["y^+"].values, subset.values, label=f"{col[i]} (PINNs)")
         plt.xscale("log")
         plt.xlabel("y^+")
-        plt.ylabel(col[i])
-        plt.title(f"{col[i]} as a function of y^+")
+        if col[i] == "u'v'_pred":
+            plt.ylabel(f"- {col[i]}")
+            plt.title(f"- {col[i]} as a function of y^+")
+        else:
+            plt.ylabel(col[i])
+            plt.title(f"{col[i]} as a function of y^+")
         plt.legend()
         st.pyplot(plt)
         plt.close()
@@ -45,6 +49,8 @@ def display_test_plots(df):
 
         # Plotting predicted values
         subset_pred = df[pred_cols[i]]
+        if pred_cols[i] == "u'v'_pred":
+            subset_pred = -1*df[pred_cols[i]]
         plt.plot(
             df["y^+"].values,
             subset_pred.values,
@@ -55,25 +61,37 @@ def display_test_plots(df):
 
         # Plotting target values
         subset_target = df[target_cols[i]]
+        if target_cols[i] == "u'v'_target":
+            subset_target = -1*df[target_cols[i]]
         plt.plot(
             df["y^+"].values,
             subset_target.values,
-            label=f"{target_cols[i]} (Target)",
+            label=f"{target_cols[i]} (DNS)",
             linestyle="--",
             color="red",
         )
 
         plt.xscale("log")
         plt.xlabel("y^+")
-        plt.ylabel(pred_cols[i].replace("_pred", ""))
-        plt.title(f"{pred_cols[i].replace('_pred', '')} Prediction vs. Target")
+        if pred_cols[i] == "u'v'_pred":
+            plt.ylabel(f"- {pred_cols[i].replace('_pred', '')}")
+            plt.title(f"- {pred_cols[i].replace('_pred', '')} Prediction vs. DNS")
+        else:
+            plt.ylabel(pred_cols[i].replace('_pred', ''))
+            plt.title(f"{pred_cols[i].replace('_pred', '')} Prediction vs. DNS")
         plt.legend()
         st.pyplot(plt)
         plt.close()
 
 
-def display_metrics(metrics):
+def display_metrics(metrics, timer_start, timer_stop):
     st.subheader("Metrics")
+    st.metric("Excecution time", 
+              value=f"{timer_stop - timer_start:.2f} seconds",
+              delta=None,
+              delta_color="normal",
+              help=None,
+              label_visibility="visible")
     st.metric(
         "Total MSE",
         metrics["mse_total"][0],
@@ -99,3 +117,5 @@ def display_metrics(metrics):
         label_visibility="visible",
     )
     st.dataframe(metrics)
+
+
