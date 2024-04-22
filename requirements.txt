@@ -10,3 +10,4 @@ tqdm
 streamlit_option_menu
 lightning
 torch
+requests
