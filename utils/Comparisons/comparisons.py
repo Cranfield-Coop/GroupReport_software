@@ -113,7 +113,7 @@ def display_plots(df_PySINDy=None, df_PINNs=None, df_DNS=None, df_DNS_Oden=None,
             plt.plot(y.values, rsm.values,linestyle="-",color="black" ,label=f"{col[i]} (RSM)")
         if col[i] == "U":
             if df_kw is not None:
-                plt.plot(y.values, kw.values,linestyle="-",color="orange" ,label=f"{col[i]} (k-w)")
+                plt.plot(y.values, kw.values,linestyle="-",color="orange" ,label=f"{col[i]} (k–ω)")
         if log_scale:
             plt.xscale('log')
         plt.xlabel('y^+')
