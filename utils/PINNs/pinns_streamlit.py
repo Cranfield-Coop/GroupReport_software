@@ -15,7 +15,6 @@ def app():
     mode_option = st.radio("Select mode:", ("Inference Mode", "Test Mode"))
 
     if mode_option == "Inference Mode":
-        noise_level = st.slider('Before uploading, select the noise level (%)', 0, 50, 0)
         uploaded_file = st.file_uploader(
             "Upload a CSV file with features or let the app generate it:", type=["csv"]
         )
@@ -69,11 +68,10 @@ def app():
             st.download_button(
                 "Download Prediction CSV",
                 data=pd.read_csv(temp_csv_path).to_csv(index=False),
-                file_name="predictions.csv",
+                file_name="prediction_output_pinns.csv",
             )
 
     elif mode_option == "Test Mode":
-        noise_level = st.slider('Before uploading, select the noise level (%)', 0, 50, 0)
         uploaded_file_pinns = st.file_uploader(
             "Upload CSV file with features + target values:", type=["csv"]
         )
@@ -83,14 +81,11 @@ def app():
             if all(col in df.columns for col in columns):
                 df = df[columns]
                 Reynolds_Numbers = sorted(df["Re_tau"].unique(), reverse=True)
+                if len(Reynolds_Numbers) > 1:
+                    st.error("Please upload a csv file with a single Reynolds number.")
             else:
                 st.error("Please upload a csv file with the columns y/delta, y^+, Re_tau, U, u'u', v'v', w'w', u'v', P, dU/dy, nu, u_tau and k to proceed.")
                 return None
-            st.write(f"Adding noise to the dataframe with noise level: {noise_level}%")
-            df_noise = df.drop(columns='Re_tau').applymap(
-                lambda x: x + np.random.normal(0, noise_level/100))
-            df_noise['Re_tau'] = df['Re_tau']
-            df = df_noise.copy()
             if 'run_test' not in st.session_state:
                 st.session_state.run_test = False
             if st.button("Run Test Inference"):
@@ -98,11 +93,9 @@ def app():
             if st.session_state.run_test:
                 timer_start = time.time()
                 temp_csv_test_path = tempfile.mktemp(suffix=".csv")
-                df.to_csv(temp_csv_test_path,index=False)
-                '''
                 with open(temp_csv_test_path, "wb") as f:
                     f.write(uploaded_file_pinns.getvalue())
-                '''
+            
 
                 # Step 2: Run Test Inference
                 metrics = run_test_inference(
