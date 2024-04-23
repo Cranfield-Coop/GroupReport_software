@@ -17,7 +17,6 @@ def app():
     #st.image(logo_path, width=100)
     st.write("# Turbulence Modelling Predictor")
     st.markdown('<p style="font-size: 15px; font-style: italic;"> ~Developed by Group 2 Cranfield CO-OP</p>',unsafe_allow_html=True) 
-    noise_level = st.slider('Before uploading, select the noise level (%)', 0, 50, 0)
     uploaded_file_pysindy = st.file_uploader("\n\n**Please upload the CSV below.**", type=['csv'], key="PySINDy")
     if uploaded_file_pysindy is not None:
         st.success("File successfully uploaded!")
@@ -27,19 +26,12 @@ def app():
         else:
             st.error("Please upload a csv file with the columns y^+, U, Re_tau, u'u', v'v', w'w', u'v', P and dU/dy to proceed.")
             return None
-        st.write(
-            f"Adding noise to the dataframe with noise level: {noise_level}%")
-        df_noise = df.drop(columns='Re_tau').applymap(
-            lambda x: x + np.random.normal(0, noise_level/100))
-        df_noise['Re_tau'] = df['Re_tau']
-        df = df_noise.copy()
         Reynolds_Numbers = sorted(df["Re_tau"].unique(), reverse=True)
         st.header("PySINDy Model")
         st.subheader("Data processing")
         mode_choice = st.selectbox("Choose processing mode:", ['Data with interpolation', 'Data without interpolation'])
         if mode_choice == 'Data with interpolation':
             nb_interpolation = st.number_input("Please enter the number of data points to be generated with interpolation:", min_value=5000, max_value=100000, value=10000,step=1000, key='nb_interp')
-            parameters = True
             if nb_interpolation < len(df):
                 st.error(f"The number of data points to be generated with interpolation must be greater than the number of data points in the csv file ({len(df)})")
                 return None
