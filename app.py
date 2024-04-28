@@ -4,33 +4,26 @@ import utils.PySINDy.pysindy_streamlit as pysindy_streamlit
 import utils.PINNs.pinns_streamlit as pinns_streamlit
 import utils.Comparisons.comparisons_streamlit as comparisons_streamlit
 
-st.set_page_config(
-        page_title="Turbulence Modelling Predictor",
-)
+
+# Configure the Streamlit application page
+st.set_page_config(page_title="Turbulence Modelling Predictor",)
 
 
 logo_path = "img/cranfield_logo.png"
 
 class MultiApp:
 
-    def __init__(self):
-        self.apps = []
-
-    def add_app(self, title, func):
-
-        self.apps.append({
-            "title": title,
-            "function": func
-        })
-
     def run():
-        # app = st.sidebar(
+        """
+        Displays functional modules using the Streamlit sidebar and manages navigation between them.
+        """
         with st.sidebar:
+            # Display the logo in the application sidebar
             st.sidebar.image(logo_path, use_column_width=True)      
+            # Create a menu in the application
             app = option_menu(
                 menu_title='Menu',
                 options=['PySINDy','PINNs','Comparisons'],
-                #icons=['house-fill','person-circle','trophy-fill','chat-fill','info-circle-fill'],
                 menu_icon='chat-text-fill',
                 default_index=0,
                 styles={
@@ -41,13 +34,14 @@ class MultiApp:
                 
                 )
 
+        # Select the module to be used from the menu
         if app == "PySINDy":
-            pysindy_streamlit.app()
+            pysindy_streamlit.app() # Call the PySINDy app function
         if app == "PINNs":
-            pinns_streamlit.app()
+            pinns_streamlit.app() # Call the PINNs app function
         if app == "Comparisons":
-            comparisons_streamlit.app()
+            comparisons_streamlit.app() # Call the comparisons app function
              
        
-  
+    # Run the app
     run()
