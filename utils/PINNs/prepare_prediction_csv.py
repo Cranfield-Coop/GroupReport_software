@@ -60,11 +60,11 @@ def prepare_prediction_csv(Re_tau, y_plus_min, y_plus_max, y_plus_delta):
 
     return filename
 
-
-if __name__ == "__main__":
-    prepare_prediction_csv(
-        Re_tau=5200,
-        y_plus_min=7.372666080054942,  # Min = 0
-        y_plus_max=305.6078192807962,  # Max = Re_tau (should be smaller)
-        y_plus_delta=1,  # delta between each coordinates
-    )
+# DECOMMENT THE FOLLOWING LINES FOR TESTING - DEBBUGING ONLY
+# if __name__ == "__main__":
+#     prepare_prediction_csv(
+#         Re_tau=5200,
+#         y_plus_min=7.372666080054942,  # Min = 0
+#         y_plus_max=305.6078192807962,  # Max = Re_tau (should be smaller)
+#         y_plus_delta=1,  # delta between each coordinates
+#     )

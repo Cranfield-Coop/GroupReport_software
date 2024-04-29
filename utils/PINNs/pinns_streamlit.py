@@ -55,7 +55,7 @@ def app():
                     f.write(uploaded_file.getvalue())
 
             run_inference(
-                model_checkpoint_path="epoch=20332-step=731988.ckpt",
+                model_checkpoint_path="utils/PINNs/weights/epoch=20332-step=731988.ckpt",
                 prediction_dataset_path=csv_path,
                 prediction_output_path=temp_csv_path,
             )
@@ -99,7 +99,7 @@ def app():
 
                 # Step 2: Run Test Inference
                 metrics = run_test_inference(
-                    model_checkpoint_path="epoch=20332-step=731988.ckpt",
+                    model_checkpoint_path="utils/PINNs/weights/epoch=20332-step=731988.ckpt",
                     test_dataset_path=temp_csv_test_path,
                     prediction_output_path="output_test.csv",
                 )
